@@ -38,20 +38,14 @@ logLik = function(theta,s,env,nspp){
   return(-logliki)
 }
 
-TrFI = function(env,theta,nspp,nsample = 15000){
+TrFI = function(env,theta,nspp,nsample = 500){
   ncov = length(env)
   betas = matrix(theta[1:(ncov*nspp)],ncov,nspp)
   graphpar = theta[(ncov*nspp+1):length(theta)]
   graph = getGraph(graphpar,nspp)
   Z_samples = SampleZ(env,betas,graph,nsample)
-  Tr = matrix(0,nrow = nsample,ncol = length(theta))
+  Tr = matrix(0,nrow = nsample,ncol = .5*(nspp-1)*nspp)
   k=1
-  for(i in 1:nspp){
-    for(j in 1:ncov){
-      Tr[,k] = env[j]*Z_samples[,i]
-      k = k + 1 
-    }
-  }
   
   for(i in 2:nspp-1){
     for(j in (i+1):nspp){
