@@ -54,6 +54,7 @@ raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
 for(i in 2:(nlat^2/data_using)){
   cat("Making FImap",i, "...\n\n")
   FImap = apply(env,1,TrFI,MLE_1$par,nspp)
+  FImap = abs(FImap)
   filename = paste0("./figs/Iter_",i,"_FImap.jpg")
   jpeg(filename)
   raster::plot(raster::raster(matrix(FImap,nlat,nlat)))
