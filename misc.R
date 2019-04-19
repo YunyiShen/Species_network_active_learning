@@ -50,6 +50,6 @@ TrFI = function(env,theta,nspp,nsample = 500){
     for(j in (i+1):nspp)
     Tr = Tr + var(Z_sample[,i]*Z_sample[,j])
   }
-  cat(Tr,"\n") # for test
+  #cat(Tr,"\n") # for test
   return(Tr)
 }
