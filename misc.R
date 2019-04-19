@@ -58,6 +58,7 @@ TrFI = function(env,theta,nspp,nsample = 500){
     Tr[,k] = (Z_sample[,i]*Z_sample[,j])
     k = k + 1
   }
+  FI = cov(Tr)
   #cat(Tr,"\n") # for test
-  return(sum(eigen(Tr,T,T)))
+  return(1/sum(1/eigen(Tr,T,T)))
 }
