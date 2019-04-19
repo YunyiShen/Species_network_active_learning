@@ -24,6 +24,7 @@ getGraphpar = function(graph,nspp){
 }
 
 logLik = function(theta,s,env,nspp){
+  require(IsingSampler)
   ncov = ncol(env)
   nsite = nrow(env)
   beta = matrix(theta[1:(ncov*nspp)],ncov,nspp)
@@ -35,4 +36,20 @@ logLik = function(theta,s,env,nspp){
     IsingStateProb(s[k,],graph,thr[k,],1,c(-1L,1L))
   },s,thr,graph)))
   return(-logliki)
+}
+
+TrFI = function(env,theta,nspp,nsample = 500){
+  ncov = length(env)
+  betas = matrix(theta[1:(ncov*nspp)],ncov,nspp)
+  graphpar = theta[(ncov*nspp+1):length(theta)]
+  graph = getGraph(graphpar,nspp)
+  Z_samples = SampleZ(env,betas,graph,nsample)
+  Tr = 0
+  Tr = Tr + sum(apply(Z_samples,2,var))
+  for(i in 2:nspp-1){
+    for(j in (i+1):nspp)
+    Tr = Tr + var(Z_sample[,i]*Z_sample[,j])
+  }
+  cat(Tr,"\n") # for test
+  return(Tr)
 }
