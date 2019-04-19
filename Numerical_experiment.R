@@ -29,7 +29,7 @@ Z_sample = t(Z_sample)
 
 
 ## Numeric experiment
-data_using = 90
+data_using = 30
 Iter_1 = sample(nlat^2,data_using)
 env_1 = env[Iter_1,]
 Z_sample_1 = Z_sample[Iter_1,]
@@ -44,7 +44,11 @@ graphpar_est_1 = MLE_1$par[-(1:length(betas))]
 graphpar_real = getGraphpar(graph,nspp)
 L2_dif = matrix(1,1,nlat^2/data_using)
 L2_dif[1]=sqrt(sum((graphpar_est_1-graphpar_real)^2))
+L2_dif_random = L2_dif
+Iter_1_random = Iter_1
+Sampled_random = Sampled
 raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
+
 
 for(i in 2:(nlat^2/data_using)){
   cat("Making FImap",i, "...\n\n")
@@ -68,6 +72,19 @@ for(i in 2:(nlat^2/data_using)){
   raster::plot(raster::raster(matrix(Sampled,nlat,nlat)))
   dev.off()
   
+  cat("random sample\n\n")
+  Iter_2_random = sample(which(Sampled_random==0),data_using)
+  Iter_1_random = c(Iter_1_random,Iter_2_random)
+  
+  env_1_rand = env[c(Iter_1_random),]
+  Z_sample_1_rand = Z_sample[Iter_1_random,]
+  Sampled_random = matrix(0,1,nlat^2)
+  Sampled_random[,Iter_1_random]=1
+  filename = paste0("./figs/Iter_",i,"_sampled_random.jpg")
+  jpeg(filename)
+  raster::plot(raster::raster(matrix(Sampled_random,nlat,nlat)))
+  dev.off()
+  
   cat("MLE",i, "\n\n")
   MLE_1 = optim(theta_ini,logLik,s=Z_sample_1,env=env_1,nspp=nspp,method = "L-BFGS-B",control = list(maxit=1000))
   graphpar_est_1 = MLE_1$par[-(1:length(betas))]
@@ -79,5 +96,19 @@ for(i in 2:(nlat^2/data_using)){
   cat("Done\n\n")
   
   cat("Iter_",i,"done with L2_dif",L2_dif[i],"\n\n\n")
+  
+  
+  
+  cat("MLE of random sample",i, "\n\n")
+  MLE_1_rand = optim(theta_ini,logLik,s=Z_sample_1_rand,env=env_1_rand,nspp=nspp,method = "L-BFGS-B",control = list(maxit=1000))
+  graphpar_est_1_rand = MLE_1_rand$par[-(1:length(betas))]
+  L2_dif_random[i]=sqrt(sum((graphpar_est_1_rand-graphpar_real)^2))
+  filename = paste0("./figs/Iter_",i,"_graph_random.jpg")
+  jpeg(filename)
+  raster::plot(raster::raster(getGraph(graphpar_est_1_rand,nspp)))
+  dev.off()
+  cat("Done\n\n")
+  
+  cat("Iter_",i,"done with L2_dif_rand",L2_dif_random[i],"\n\n\n")
   
 }

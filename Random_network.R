@@ -43,7 +43,7 @@ raster::plot(raster::raster(getGraph(graphpar_est,nspp)))
 
 ## start active leaning
 ### first round
-data_using = 90
+data_using = 0
 Iter_1 = sample(nlat^2,data_using)
 env_1 = env[Iter_1,]
 Z_sample_1 = Z_sample[Iter_1,]
