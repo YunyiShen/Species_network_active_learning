@@ -38,7 +38,7 @@ logLik = function(theta,s,env,nspp){
   return(-logliki)
 }
 
-TrFI = function(env,theta,nspp,nsample = 500){
+TrFI = function(env,theta,nspp,nsample = 10000){
   ncov = length(env)
   betas = matrix(theta[1:(ncov*nspp)],ncov,nspp)
   graphpar = theta[(ncov*nspp+1):length(theta)]
