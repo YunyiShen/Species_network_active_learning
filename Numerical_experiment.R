@@ -18,7 +18,7 @@ nlat = 30 # nlat*nlat grid (not really too important)
 landscape = (runif(nlat*nlat))
 raster::plot(raster::raster(matrix(landscape,nlat,nlat)))
 
-betas = matrix(runif(2*nspp,-1,1),2,nspp)
+betas = rbind(runif(nspp,-.3,.3),rnorm(nspp,0,4))
 raster::plot(raster::raster(betas))
 env = cbind(1,landscape)
 
@@ -44,7 +44,7 @@ graphpar_est_1 = MLE_1$par[-(1:length(betas))]
 graphpar_real = getGraphpar(graph,nspp)
 L2_dif = matrix(1,1,nlat^2/data_using)
 L2_dif[1]=sqrt(sum((graphpar_est_1-graphpar_real)^2))
-#raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
+raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
 
 for(i in 2:(nlat^2/data_using)){
   cat("Making FImap",i, "...\n\n")
@@ -74,7 +74,7 @@ for(i in 2:(nlat^2/data_using)){
   L2_dif[i]=sqrt(sum((graphpar_est_1-graphpar_real)^2))
   filename = paste0("./figs/Iter_",i,"_graph.jpg")
   jpeg(filename)
-  raster::plot(raster::raster(getGraph(graphpar_est_2,nspp)))
+  raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
   dev.off()
   cat("Done\n\n")
   
