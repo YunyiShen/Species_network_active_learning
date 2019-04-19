@@ -44,12 +44,20 @@ TrFI = function(env,theta,nspp,nsample = 500){
   graphpar = theta[(ncov*nspp+1):length(theta)]
   graph = getGraph(graphpar,nspp)
   Z_samples = SampleZ(env,betas,graph,nsample)
-  Tr = 0
-  Tr = Tr + sum(apply(Z_samples,2,var))
+  Tr = matrix(0,nrow = nsample,ncol = length(theta))
+  k=1
+  for(i in 1:ncov){
+    for(j in 1:nspp){
+      Tr[,k] = env[i]*Z_samples[,j]
+      k = k + 1 
+    }
+  }
+  
   for(i in 2:nspp-1){
     for(j in (i+1):nspp)
-    Tr = Tr + var(Z_sample[,i]*Z_sample[,j])
+    Tr[,k] = (Z_sample[,i]*Z_sample[,j])
+    k = k + 1
   }
   #cat(Tr,"\n") # for test
-  return(Tr)
+  return(sum(eigen(Tr,T,T)))
 }
