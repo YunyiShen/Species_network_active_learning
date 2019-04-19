@@ -46,19 +46,20 @@ TrFI = function(env,theta,nspp,nsample = 500){
   Z_samples = SampleZ(env,betas,graph,nsample)
   Tr = matrix(0,nrow = nsample,ncol = length(theta))
   k=1
-  for(i in 1:ncov){
-    for(j in 1:nspp){
-      Tr[,k] = env[i]*Z_samples[,j]
+  for(i in 1:nspp){
+    for(j in 1:ncov){
+      Tr[,k] = env[j]*Z_samples[,i]
       k = k + 1 
     }
   }
   
   for(i in 2:nspp-1){
-    for(j in (i+1):nspp)
-    Tr[,k] = (Z_sample[,i]*Z_sample[,j])
+    for(j in (i+1):nspp){
+    Tr[,k] = (Z_samples[,i]*Z_samples[,j])
     k = k + 1
+    }
   }
   FI = cov(Tr)
   #cat(Tr,"\n") # for test
-  return(1/sum(1/eigen(Tr,T,T)))
+  return(1/sum(1/eigen(FI,T,T)$value))
 }

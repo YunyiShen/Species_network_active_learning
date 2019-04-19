@@ -1,5 +1,6 @@
 ## generate a random graph
 source("misc.R")
+
 nspp = 4
 set.seed(1996)
 linking = matrix(runif(nspp^2)<0.7,nspp,nspp)
