@@ -77,9 +77,17 @@ for(i in 2:floor(nlat^2/(data_using*2))){
     return(which(env2==env_level[FI_level==max(FI_level)]))
   },FI_unsurveied,env_unsurveied[,2],dataperlevel)
   
-  Iter_2 = order(FImap*(1-Sampled),decreasing=TRUE)[1:data_using]
+  data_using_for_graph = ceiling(data_using/2)
+  data_using_for_field = floor(data_using/2)
+  
+  
+  
+  Iter_2_graph = order(FImap*(1-Sampled),decreasing=TRUE)[1:data_using_for_graph]
   #Iter_2 = site_unsuried[max_FI]
-  Iter_1 = c(Iter_1,Iter_2)
+  Iter_1_temp = c(Iter_1,Iter_2_graph)
+  Iter_2_field = sample( (1:nlat^2)[-Iter_1_temp],data_using_for_field )
+  Iter_1 = c(Iter_1_temp,Iter_2_field)
+  
   
   env_1 = env[c(Iter_1),]
   Z_sample_1 = Z_sample[Iter_1,]
