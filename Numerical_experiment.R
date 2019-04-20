@@ -77,8 +77,9 @@ for(i in 2:floor(nlat^2/(data_using*2))){
     return(which(env2==env_level[FI_level==max(FI_level)]))
   },FI_unsurveied,env_unsurveied[,2],dataperlevel)
   
-  data_using_for_graph = ceiling(data_using/2)
-  data_using_for_field = floor(data_using/2)
+  data_using_for_field = floor(data_using/i)
+  data_using_for_graph = data_using-data_using_for_field
+  
   
   
   
