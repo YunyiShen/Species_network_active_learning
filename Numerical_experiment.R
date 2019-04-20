@@ -21,7 +21,7 @@ landscape = (rnorm(nlat*nlat))
 raster::plot(raster::raster(matrix(landscape,nlat,nlat)))
 
 set.seed(42)
-betas = rbind(runif(nspp,-.3,.3),rnorm(nspp,0,1))
+betas = rbind(runif(nspp,-.3,.3),rnorm(nspp,0,3))
 raster::plot(raster::raster(betas))
 env = cbind(1,landscape)
 
@@ -33,7 +33,8 @@ Z_sample = t(Z_sample)
 
 ## Numeric experiment
 data_using = 50
-Iter_1 = sample(nlat^2,data_using)
+#Iter_1 = sample(nlat^2,data_using)
+Iter_1 = order(env[,2],decreasing=TRUE)[(1:data_using-1)* (nlat^2/data_using) + 1]
 env_1 = env[Iter_1,]
 Z_sample_1 = Z_sample[Iter_1,]
 Sampled = matrix(0,1,nlat^2)
@@ -63,8 +64,21 @@ for(i in 2:floor(nlat^2/(data_using*2))){
   dev.off()
   cat("Done \n\n")
   
-  FI_unsurveied = FImap * (1-Sampled)
-  Iter_2 = order(FI_unsurveied,decreasing=TRUE)[1:data_using]
+  FI_unsurveied = FImap[Sampled==0]
+  env_unsurveied = env[Sampled==0,]
+  
+  site_unsuried = (1:(nlat^2))[Sampled==0]
+  
+  dataperlevel = floor( sum(1-Sampled)/data_using)
+  max_FI = apply(matrix(1:data_using),1,function(k,FIm,env2,dataperlevel){
+    order_env = order(env2,decreasing=TRUE)
+    env_level = env2 [order_env[1:dataperlevel + (k-1)*dataperlevel]]
+    FI_level = FIm[order_env[1:dataperlevel + (k-1)*dataperlevel]]
+    return(which(env2==env_level[FI_level==max(FI_level)]))
+  },FI_unsurveied,env_unsurveied[,2],dataperlevel)
+  
+  Iter_2 = order(FImap*(1-Sampled),decreasing=TRUE)[1:data_using]
+  #Iter_2 = site_unsuried[max_FI]
   Iter_1 = c(Iter_1,Iter_2)
   
   env_1 = env[c(Iter_1),]
@@ -77,7 +91,13 @@ for(i in 2:floor(nlat^2/(data_using*2))){
   dev.off()
   
   cat("random sample\n\n")
-  Iter_2_random = sample(which(Sampled_random==0),data_using)
+  
+  rand_sample = apply(matrix(1:data_using),1,function(dummy,dataperlevl){sample(dataperlevel,1)},dataperlevel)
+  rand_sample = rand_sample + (1:data_using-1)*dataperlevel
+  
+  #Iter_2_random = sample(which(Sampled_random==0),data_using)
+  order_env = order(env_unsurveied[,2],decreasing=TRUE)
+  Iter_2_random = site_unsuried[order_env[rand_sample]]
   Iter_1_random = c(Iter_1_random,Iter_2_random)
   
   env_1_rand = env[c(Iter_1_random),]
