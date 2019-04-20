@@ -1,0 +1,14 @@
+set.seed(1996)
+linking = matrix(runif(nspp^2)<0.7,nspp,nspp)
+linking = linking * t(linking)
+diag(linking) = 0
+raster::plot(raster::raster(linking))
+strength = matrix(runif(nspp^2,-1,1),nspp,nspp)
+strength = .5*(strength+t(strength))
+
+landscape = (runif(nlat*nlat))
+raster::plot(raster::raster(matrix(landscape,nlat,nlat)))
+
+betas = rbind(runif(nspp,-.3,.3),rnorm(nspp,0,4))
+raster::plot(raster::raster(betas))
+env = cbind(1,landscape)

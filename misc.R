@@ -1,8 +1,8 @@
-SampleZ = function(env,beta,graph,n){
+SampleZ = function(env,beta,graph,n,method = "CFTP"){
   nspp = ncol(beta)
   require(IsingSampler)
   thr = env%*%beta
-  res = IsingSampler(thresholds = thr,graph = graph,responses = c(-1L,1L),n=n,method = "CFTP")
+  res = IsingSampler(thresholds = thr,graph = graph,responses = c(-1L,1L),n=n,method = method)
 }
 
 getGraph = function(graphPar,nspp){
@@ -38,12 +38,12 @@ logLik = function(theta,s,env,nspp){
   return(-logliki)
 }
 
-TrFI = function(env,theta,nspp,nsample = 500){
+TrFI = function(env,theta,nspp,nsample = 500,method = "MH"){
   ncov = length(env)
   betas = matrix(theta[1:(ncov*nspp)],ncov,nspp)
   graphpar = theta[(ncov*nspp+1):length(theta)]
   graph = getGraph(graphpar,nspp)
-  Z_samples = SampleZ(env,betas,graph,nsample)
+  Z_samples = SampleZ(env,betas,graph,nsample,method = method)
   Tr = matrix(0,nrow = nsample,ncol = .5*(nspp-1)*nspp)
   k=1
   
@@ -55,5 +55,5 @@ TrFI = function(env,theta,nspp,nsample = 500){
   }
   FI = cov(Tr)
   #cat(Tr,"\n") # for test
-  return(1/sum(1/eigen(FI,F,F)$value))
+  return(1/sum(1/eigen(FI,T,T)$value))
 }

@@ -2,9 +2,10 @@
 source("misc.R")
 
 nspp = 4
-set.seed(1996)
-linking = matrix(runif(nspp^2)<0.7,nspp,nspp)
-linking = linking * t(linking)
+set.seed(12345)
+#linking = matrix(runif(nspp^2)<0.7,nspp,nspp)
+#linking = linking * t(linking)
+linking = matrix(1,nspp,nspp)
 diag(linking) = 0
 raster::plot(raster::raster(linking))
 strength = matrix(runif(nspp^2,-1,1),nspp,nspp)
@@ -16,10 +17,11 @@ raster::plot(raster::raster(graph))
 ## generate some random environment
 nlat = 30 # nlat*nlat grid (not really too important)
 
-landscape = (runif(nlat*nlat))
+landscape = (rnorm(nlat*nlat))
 raster::plot(raster::raster(matrix(landscape,nlat,nlat)))
 
-betas = rbind(runif(nspp,-.3,.3),rnorm(nspp,0,4))
+set.seed(42)
+betas = rbind(runif(nspp,-.3,.3),rnorm(nspp,0,1))
 raster::plot(raster::raster(betas))
 env = cbind(1,landscape)
 
@@ -30,7 +32,7 @@ Z_sample = t(Z_sample)
 
 
 ## Numeric experiment
-data_using = 90
+data_using = 50
 Iter_1 = sample(nlat^2,data_using)
 env_1 = env[Iter_1,]
 Z_sample_1 = Z_sample[Iter_1,]
@@ -51,7 +53,7 @@ Sampled_random = Sampled
 raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
 
 
-for(i in 2:(nlat^2/data_using)){
+for(i in 2:floor(nlat^2/(data_using*2))){
   cat("Making FImap",i, "...\n\n")
   FImap = apply(env,1,TrFI,MLE_1$par,nspp)
   FImap = abs(FImap)
@@ -114,3 +116,16 @@ for(i in 2:(nlat^2/data_using)){
   cat("Iter_",i,"done with L2_dif_rand",L2_dif_random[i],"\n\n\n")
   
 }
+
+require(ggplot2)
+data_temp = data.frame(Sample_Size = 1:10 * 45,L2_difference = L2_dif[1:10],method = "Active learning")
+temp = data.frame(Sample_Size = 1:10 * 45,L2_difference = L2_dif_random[1:10],method = "Random sampling")
+data_temp = rbind(data_temp,temp)
+rm(temp)
+
+ggplot(data = data_temp,aes(x=Sample_Size,y=L2_difference))+
+  geom_point(aes(color = method))+
+  geom_line(aes(color = method))
+
+require(export)
+graph2ppt(file="5spp_activelearning_45perstep.pptx")
