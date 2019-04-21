@@ -21,7 +21,7 @@ landscape = (rnorm(nlat*nlat))
 raster::plot(raster::raster(matrix(landscape,nlat,nlat)))
 
 set.seed(42)
-betas = rbind(runif(nspp,-.3,.3),rnorm(nspp,0,3))
+betas = rbind(rnorm(nspp,0,.25),rnorm(nspp,0,3))
 raster::plot(raster::raster(betas))
 env = cbind(1,landscape)
 
@@ -32,7 +32,7 @@ Z_sample = t(Z_sample)
 
 
 ## Numeric experiment
-data_using = 50
+data_using = 90
 #Iter_1 = sample(nlat^2,data_using)
 Iter_1 = order(env[,2],decreasing=TRUE)[(1:data_using-1)* (nlat^2/data_using) + 1]
 env_1 = env[Iter_1,]
@@ -47,7 +47,9 @@ MLE_1 = optim(theta_ini,logLik,s=Z_sample_1,env=env_1,nspp=nspp,method = "L-BFGS
 graphpar_est_1 = MLE_1$par[-(1:length(betas))]
 graphpar_real = getGraphpar(graph,nspp)
 L2_dif = matrix(1,1,nlat^2/data_using)
-L2_dif[1]=sqrt(sum((graphpar_est_1-graphpar_real)^2))
+#L2_dif[1]=sqrt(sum((graphpar_est_1-graphpar_real)^2))
+real_value = c( as.vector( betas), graphpar_real)
+L2_dif[1]=sqrt(sum((MLE_1$par-real_value)^2))
 L2_dif_random = L2_dif
 Iter_1_random = Iter_1
 Sampled_random = Sampled
@@ -57,6 +59,7 @@ raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
 for(i in 2:floor(nlat^2/(data_using*2))){
   cat("Making FImap",i, "...\n\n")
   FImap = apply(env,1,TrFI,MLE_1$par,nspp)
+  #FImap = apply(env,1,TrFI,real_value,nspp)#cheating
   FImap = abs(FImap)
   filename = paste0("./figs/Iter_",i,"_FImap.jpg")
   jpeg(filename)
@@ -77,17 +80,18 @@ for(i in 2:floor(nlat^2/(data_using*2))){
     return(which(env2==env_level[FI_level==max(FI_level)]))
   },FI_unsurveied,env_unsurveied[,2],dataperlevel)
   
-  data_using_for_field = floor(data_using/i)
-  data_using_for_graph = data_using-data_using_for_field
+  #data_using_for_field = floor(data_using/i)
+  #data_using_for_graph = data_using-data_using_for_field
   
   
   
   
-  Iter_2_graph = order(FImap*(1-Sampled),decreasing=TRUE)[1:data_using_for_graph]
+  #Iter_2_graph = order(FImap*(1-Sampled),decreasing=TRUE)[1:data_using_for_graph]
   #Iter_2 = site_unsuried[max_FI]
-  Iter_1_temp = c(Iter_1,Iter_2_graph)
-  Iter_2_field = sample( (1:nlat^2)[-Iter_1_temp],data_using_for_field )
-  Iter_1 = c(Iter_1_temp,Iter_2_field)
+  #Iter_1_temp = c(Iter_1,Iter_2_graph)
+  #Iter_2_field = sample( (1:nlat^2)[-Iter_1_temp],data_using_for_field )
+  Iter_2 = order(FImap*(1-Sampled),decreasing=TRUE)[1:data_using]
+  Iter_1 = c(Iter_1,Iter_2)
   
   
   env_1 = env[c(Iter_1),]
@@ -121,7 +125,7 @@ for(i in 2:floor(nlat^2/(data_using*2))){
   cat("MLE",i, "\n\n")
   MLE_1 = optim(theta_ini,logLik,s=Z_sample_1,env=env_1,nspp=nspp,method = "L-BFGS-B",control = list(maxit=1000))
   graphpar_est_1 = MLE_1$par[-(1:length(betas))]
-  L2_dif[i]=sqrt(sum((graphpar_est_1-graphpar_real)^2))
+  L2_dif[i]=sqrt(sum((MLE_1$par-real_value)^2))
   filename = paste0("./figs/Iter_",i,"_graph.jpg")
   jpeg(filename)
   raster::plot(raster::raster(getGraph(graphpar_est_1,nspp)))
@@ -135,7 +139,7 @@ for(i in 2:floor(nlat^2/(data_using*2))){
   cat("MLE of random sample",i, "\n\n")
   MLE_1_rand = optim(theta_ini,logLik,s=Z_sample_1_rand,env=env_1_rand,nspp=nspp,method = "L-BFGS-B",control = list(maxit=1000))
   graphpar_est_1_rand = MLE_1_rand$par[-(1:length(betas))]
-  L2_dif_random[i]=sqrt(sum((graphpar_est_1_rand-graphpar_real)^2))
+  L2_dif_random[i]=sqrt(sum((MLE_1_rand$par-real_value)^2))
   filename = paste0("./figs/Iter_",i,"_graph_random.jpg")
   jpeg(filename)
   raster::plot(raster::raster(getGraph(graphpar_est_1_rand,nspp)))
@@ -147,8 +151,8 @@ for(i in 2:floor(nlat^2/(data_using*2))){
 }
 
 require(ggplot2)
-data_temp = data.frame(Sample_Size = 1:10 * 45,L2_difference = L2_dif[1:10],method = "Active learning")
-temp = data.frame(Sample_Size = 1:10 * 45,L2_difference = L2_dif_random[1:10],method = "Random sampling")
+data_temp = data.frame(Sample_Size = 1:5 * 100,L2_difference = L2_dif[1:5],method = "Active learning")
+temp = data.frame(Sample_Size = 1:5 * 100,L2_difference = L2_dif_random[1:5],method = "Random sampling")
 data_temp = rbind(data_temp,temp)
 rm(temp)
 
