@@ -35,7 +35,7 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
       sample_curr = sample_prop
       FI_curr = FI_prop
       
-      if (FI_curr < best_distance) {
+      if (FI_curr < best_FI) {
         best_sample = sample_curr
         best_FI = FI_curr
       }
