@@ -50,7 +50,7 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
       }
     }
     #if(i%%1==0){cat(i,"\n FI_curr",FI_curr,"\n\n")}
-    svMisc::progress((i-1)/number_of_iterations,progress.bar = T)
+    svMisc::progress(((i-1)/number_of_iterations)*100,progress.bar = T)
     lines(c(i-1,i),c(FI_prev,FI_curr))
   }
   
