@@ -10,7 +10,7 @@ s_curve = function(x, center, width) {
 run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,nspp,
                                               starting_iteration, number_of_iterations,
                                               s_curve_amplitude, s_curve_center, s_curve_width,nsample = 500,method = "MH") {
-  
+  source("misc.R")
   candidate = (1:nrow(env_full))[-already_sampled]
   sample_curr = candidate[sample(length(candidate),n)]
   FI_curr = InvCR_group(env_full[c(already_sampled,sample_curr),],theta,nspp,nsample,method)
@@ -22,9 +22,14 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
     temp = current_temperature(iter, s_curve_amplitude, s_curve_center, s_curve_width)
     
     sample_prop = sample_curr
-    sample_prop[sample(n,1)]=still[sample(length(still),1)]
+    still_prop = still
+    swap1 = sample(n,1)
+    swap2 = sample(length(still),1)
+    
+    sample_prop[swap1]=still[swap2]
+    still_prop[swap2]=sample_curr[swap1]
     FI_prop = InvCR_group(env_full[c(already_sampled,sample_prop),],theta,nspp,nsample,method)
-    if(i%%1000==0){cat(i,"\n\n")}
+    
     if (temp > 0) {
       ratio = exp((FI_curr - FI_prop) / temp)
     } else {
@@ -34,6 +39,7 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
     if (runif(1) < ratio) {
       sample_curr = sample_prop
       FI_curr = FI_prop
+      still=still_prop
       
       if (FI_curr < best_FI) {
         best_sample = sample_curr
@@ -41,6 +47,6 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
       }
     }
   }
-  
+  if(i%%10==0){cat(i,"\n FI_curr",FI_curr,"\n\n")}
   return(list(sample=sample_curr, FI=FI_curr, best_sample=best_sample, best_FI=best_FI))
 }

@@ -88,6 +88,6 @@ InvCR_group = function(env,theta,nspp,nsample = 500,method = "MH"){
   
   suf_stat = Reduce('+',suf_stat_list) # sum the sufficient statistics
   FI = cov(suf_stat)
-  return(1/sum(1/eigen(FI,T,T)$value))
+  return(sum(1/eigen(FI,T,T)$value))
 }
 
