@@ -81,9 +81,11 @@ sufstat = function(env,theta,nspp,nsample = 500,method = "MH"){
   return(Tr)
 }
 
-InvCR_group = function(env,theta,nspp,nsample = 500,method = "MH"){
+InvCR_group = function(env,theta,nspp,nsample = 500,method = "MH",cl){
   env_list = split(env,row(env)) # make it a list of sites to loop with
-  suf_stat_list = lapply(env_list,sufstat,theta,nspp,nsample,method)
+ 
+  clusterExport(cl,varlist = c("theta","nspp","nsample","method"),envir = environment())
+  suf_stat_list = parLapply(cl,env_list,sufstat,theta,nspp,nsample,method)
   
   suf_stat = Reduce('+',suf_stat_list) # sum the sufficient statistics
   FI = cov(suf_stat)

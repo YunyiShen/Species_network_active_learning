@@ -9,11 +9,14 @@ s_curve = function(x, center, width) {
 
 run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,nspp,
                                               starting_iteration, number_of_iterations,
-                                              s_curve_amplitude, s_curve_center, s_curve_width,nsample = 500,method = "MH") {
+                                              s_curve_amplitude, s_curve_center, s_curve_width,nsample = 500,method = "MH",ncore = 4) {
   source("misc.R")
+  require(parallel)
+  cl = makeCluster(getOption("cl.cores", ncore))
+  clusterExport(cl,c("sufstat","getGraph","SampleZ"))
   candidate = (1:nrow(env_full))[-already_sampled]
   sample_curr = candidate[sample(length(candidate),n)]
-  FI_curr = InvCR_group(env_full[c(already_sampled,sample_curr),],theta,nspp,nsample,method)
+  FI_curr = InvCR_group(env_full[c(already_sampled,sample_curr),],theta,nspp,nsample,method,cl)
   still = (1:nrow(env_full))[-c(already_sampled,sample_curr)]
   best_sample = sample_curr
   best_FI = FI_curr
@@ -28,7 +31,7 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
     
     sample_prop[swap1]=still[swap2]
     still_prop[swap2]=sample_curr[swap1]
-    FI_prop = InvCR_group(env_full[c(already_sampled,sample_prop),],theta,nspp,nsample,method)
+    FI_prop = InvCR_group(env_full[c(already_sampled,sample_prop),],theta,nspp,nsample,method,cl)
     
     if (temp > 0) {
       ratio = exp((FI_curr - FI_prop) / temp)
