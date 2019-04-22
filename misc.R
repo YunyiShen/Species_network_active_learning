@@ -70,7 +70,7 @@ sufstat = function(env,theta,nspp,nsample = 500,method = "MH"){
   suf_beta = matrix(0,nrow = nsample,ncol = ncov*nspp)
   
   combines = combn(nspp,2)
-  paris_list = split(pairs,col(pairs))
+  pairs_list = split(combines,col(combines))
   Tr = sapply(pairs_list,function(com,sam){sam[,com[1]]*sam[,com[2]]},sam = Z_samples)
   rm(pairs_list)
   env_list = as.list(env)
