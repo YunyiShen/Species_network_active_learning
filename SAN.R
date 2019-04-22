@@ -20,6 +20,7 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
   still = (1:nrow(env_full))[-c(already_sampled,sample_curr)]
   best_sample = sample_curr
   best_FI = FI_curr
+  plot(1,1,type="n",xlim = c(0,number_of_iterations),ylim = c(0,1.5*best_FI))
   for(i in 1:number_of_iterations) {
     iter = starting_iteration + i
     temp = current_temperature(iter, s_curve_amplitude, s_curve_center, s_curve_width)
@@ -38,18 +39,20 @@ run_intermediate_annealing_process = function(env_full,already_sampled,n,theta,n
     } else {
       ratio = as.numeric(FI_prop < FI_curr)
     }
-    
+    FI_prev = FI_curr
     if (runif(1) < ratio) {
       sample_curr = sample_prop
       FI_curr = FI_prop
       still=still_prop
-      
       if (FI_curr < best_FI) {
         best_sample = sample_curr
         best_FI = FI_curr
       }
     }
+    #if(i%%1==0){cat(i,"\n FI_curr",FI_curr,"\n\n")}
+    svMisc::progress((i-1)/number_of_iterations,progress.bar = T)
+    lines(c(i-1,i),c(FI_prev,FI_curr))
   }
-  if(i%%10==0){cat(i,"\n FI_curr",FI_curr,"\n\n")}
+  
   return(list(sample=sample_curr, FI=FI_curr, best_sample=best_sample, best_FI=best_FI))
 }
