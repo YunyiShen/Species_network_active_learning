@@ -65,18 +65,17 @@ sufstat = function(env,theta,nspp,nsample = 500,method = "MH"){
   graphpar = theta[(ncov*nspp+1):length(theta)]
   graph = getGraph(graphpar,nspp)
   Z_samples = SampleZ(env,betas,graph,nsample,method = method)
-  Tr = matrix(0,nrow = nsample,ncol = .5*(nspp-1)*nspp)
-  k=1
+  #Tr = matrix(0,nrow = nsample,ncol = .5*(nspp-1)*nspp)
+  #k=1
   suf_beta = matrix(0,nrow = nsample,ncol = ncov*nspp)
-  for(i in 2:nspp-1){
-    for(j in (i+1):nspp){
-      Tr[,k] = (Z_samples[,i]*Z_samples[,j])
-      k = k + 1
-    }
-    suf_beta[,1:2 + (i-1)*2]=Z_samples[,i]%*%t(matrix(env))
-  }
-  i = nspp
-  suf_beta[,1:2 + (i-1)*2]=Z_samples[,i]%*%t(matrix(env))
+  
+  combines = combn(nspp,2)
+  paris_list = split(pairs,col(pairs))
+  Tr = sapply(pairs_list,function(com,sam){sam[,com[1]]*sam[,com[2]]},sam = Z_samples)
+  rm(pairs_list)
+  env_list = as.list(env)
+  suf_beta = lapply(env_list,'*',Z_samples)
+  suf_beta = do.call(cbind,suf_beta)
   #suf_beta = apply(Z_samples,2,function(w,k){w%*%k},t(as.matrix(env)))
   Tr = cbind(Tr,(suf_beta))
   return(Tr)
