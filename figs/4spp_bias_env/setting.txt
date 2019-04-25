@@ -1,0 +1,8 @@
+landscape1 = (rnorm(nlat*nlat,0.3,1))
+landscape2 = (rnorm(nlat*nlat,0,1))
+raster::plot(raster::raster(matrix(landscape1,nlat,nlat)))
+
+set.seed(42)
+betas = rbind(rnorm(nspp,0,1),rnorm(nspp,0,1),rnorm(nspp,0,1))
+raster::plot(raster::raster(betas))
+env = cbind(1,landscape1,landscape2)

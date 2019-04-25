@@ -52,6 +52,18 @@ TrFI = function(env,theta,nspp,nsample = 500,method = "MH"){
   return(1/sum(1/eigen(FI,T,T)$value))
 }
 
+Shan_ent = function(env,theta,nspp){
+  require(IsingSampler)
+  ncov = length(env)
+  betas = matrix(theta[1:(ncov*nspp)],ncov,nspp)
+  thr = env%*%betas
+  graphpar = theta[(ncov*nspp+1):length(theta)]
+  graph = getGraph(graphpar,nspp)
+  Pr = IsingLikelihood(graph,thr,1,c(-1L,1L))$Probability
+  entropy = -sum(Pr*log(Pr))
+  return(entropy)
+}
+
 sufstat = function(env,theta,nspp,nsample = 500,method = "MH"){
   ncov = length(env)
   betas = matrix(theta[1:(ncov*nspp)],ncov,nspp)
