@@ -19,7 +19,7 @@ raster::plot(raster::raster(graph))
 ## generate some random environment
 nlat = 30 # nlat*nlat grid (not really too important)
 
-landscape1 = (rnorm(nlat*nlat,0.3,.3))
+landscape1 = (rnorm(nlat*nlat,1,1))
 landscape2 = (rnorm(nlat*nlat,0,1))
 raster::plot(raster::raster(matrix(landscape1,nlat,nlat)))
 
@@ -33,12 +33,12 @@ Z_sample = apply(env,1,SampleZ,betas,graph,1)
 Z_sample = t(Z_sample)
 
 
-ncore = 3
+ncore = 7
 cl = makeCluster(getOption("cl.cores", ncore))
 clusterExport(cl,c("env","Shan_ent","nspp","getGraph","logLik"))
 
 ## Numeric experiment
-data_using = 45
+data_using = 60
 #Iter_1 = sample(nlat^2,data_using)
 Iter_1 = order(env[,2],decreasing=TRUE)[(1:data_using-1)* (nlat^2/data_using) + 1]
 env_1 = env[Iter_1,]
@@ -153,8 +153,8 @@ for(i in 2:floor(nlat^2/(data_using))){
 stopCluster(cl)
 
 require(ggplot2)
-data_temp = data.frame(Sample_Size = 2:20 * 45,L2_difference = as.numeric( L2_dif[2:20]),method = "Active learning")
-temp = data.frame(Sample_Size = 2:20 * 45,L2_difference = as.numeric( L2_dif_random[2:20]),method = "Environmental Gradient")
+data_temp = data.frame(Sample_Size = 2:15 * 60,L2_difference = as.numeric( L2_dif[2:15]),method = "Active learning")
+temp = data.frame(Sample_Size = 2:15 * 60,L2_difference = as.numeric( L2_dif_random[2:15]),method = "Environmental Gradient")
 data_temp = rbind(data_temp,temp)
 rm(temp)
 
@@ -163,4 +163,4 @@ ggplot(data = data_temp,aes(x=Sample_Size,y=L2_difference))+
   geom_line(aes(color = method))
 
 require(export)
-graph2ppt(file="4spp_activelearning_2_biasenv_mu0.3_sd.3_mu.2_sd1.pptx")
+graph2ppt(file="4spp_activelearning_2_biasenv_mu1_sd1_mu0_sd1.pptx")
