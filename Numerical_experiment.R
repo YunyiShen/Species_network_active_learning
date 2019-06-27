@@ -3,7 +3,7 @@ source("misc.R")
 require(parallel)
 require(optimParallel)
 
-nspp = 4
+nspp = 3
 set.seed(12345)
 #linking = matrix(runif(nspp^2)<0.7,nspp,nspp)
 #linking = linking * t(linking)
@@ -17,11 +17,11 @@ graph = strength * linking
 raster::plot(raster::raster(graph))
 
 ## generate some random environment
-nlat = 30 # nlat*nlat grid (not really too important)
+nlat = 30 # nlat*nlat grid (not really important)
 
 landscape1 = (rnorm(nlat*nlat,1,1))
 landscape2 = (rnorm(nlat*nlat,0,1))
-raster::plot(raster::raster(matrix(landscape1,nlat,nlat)))
+raster::plot(raster::raster(matrix(landscape2,nlat,nlat)))
 
 set.seed(42)
 betas = rbind(rnorm(nspp,0,1),rnorm(nspp,0,1),rnorm(nspp,0,1))
@@ -33,7 +33,7 @@ Z_sample = apply(env,1,SampleZ,betas,graph,1)
 Z_sample = t(Z_sample)
 
 
-ncore = 7
+ncore = 6
 cl = makeCluster(getOption("cl.cores", ncore))
 clusterExport(cl,c("env","Shan_ent","nspp","getGraph","logLik"))
 
@@ -75,8 +75,8 @@ for(i in 2:floor(nlat^2/(data_using))){
   dev.off()
   cat("Done \n\n")
   
-  FI_unsurveied = FImap[Sampled==0]
-  env_unsurveied = env[Sampled==0,]
+  FI_unsurveyed = FImap[Sampled==0]
+  env_unsurveyed = env[Sampled==0,]
   
   site_unsuried = (1:(nlat^2))[Sampled==0]
   
@@ -86,7 +86,7 @@ for(i in 2:floor(nlat^2/(data_using))){
     env_level = env2 [order_env[1:dataperlevel + (k-1)*dataperlevel]]
     FI_level = FIm[order_env[1:dataperlevel + (k-1)*dataperlevel]]
     return(which(env2==env_level[FI_level==max(FI_level)]))
-  },FI_unsurveied,env_unsurveied[,2],dataperlevel)
+  },FI_unsurveyed,env_unsurveyed[,2],dataperlevel)
   
   Iter_2 = order(FImap*(1-Sampled),decreasing=TRUE)[1:data_using]
   Iter_1 = c(Iter_1,Iter_2)
@@ -103,13 +103,13 @@ for(i in 2:floor(nlat^2/(data_using))){
   
   cat("random sample\n\n")
   
-  env_unsurveied_rand = env[Sampled_random==0,]
+  env_unsurveyed_rand = env[Sampled_random==0,]
   rand_sample = apply(matrix(1:data_using),1,function(dummy,dataperlevl){sample(dataperlevel,1)},dataperlevel)
   rand_sample = rand_sample + (1:data_using-1)*dataperlevel
   
   site_unsuried_rand = (1:(nlat^2))[Sampled_random==0]
   #Iter_2_random = sample(which(Sampled_random==0),data_using)
-  order_env_rand = order(env_unsurveied_rand[,2],decreasing=TRUE)
+  order_env_rand = order(env_unsurveyed_rand[,2],decreasing=TRUE)
   Iter_2_random = site_unsuried_rand[order_env_rand[rand_sample]]
   Iter_1_random = c(Iter_1_random,Iter_2_random)
   
@@ -153,8 +153,8 @@ for(i in 2:floor(nlat^2/(data_using))){
 stopCluster(cl)
 
 require(ggplot2)
-data_temp = data.frame(Sample_Size = 2:15 * 60,L2_difference = as.numeric( L2_dif[2:15]),method = "Active learning")
-temp = data.frame(Sample_Size = 2:15 * 60,L2_difference = as.numeric( L2_dif_random[2:15]),method = "Environmental Gradient")
+data_temp = data.frame(Sample_Size = 1:9 * 60,L2_difference = as.numeric( L2_dif[1:9]),method = "Active learning")
+temp = data.frame(Sample_Size = 1:9 * 60,L2_difference = as.numeric( L2_dif_random[1:9]),method = "Environmental Gradient")
 data_temp = rbind(data_temp,temp)
 rm(temp)
 
@@ -163,4 +163,4 @@ ggplot(data = data_temp,aes(x=Sample_Size,y=L2_difference))+
   geom_line(aes(color = method))
 
 require(export)
-graph2ppt(file="4spp_activelearning_2_biasenv_mu1_sd1_mu0_sd1.pptx")
+graph2ppt(file="3spp_activelearning_2_biasenv_mu1_sd1_mu0_sd1.pptx")
